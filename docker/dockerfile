@@ -1,0 +1,36 @@
+FROM ubuntu:20.04
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Install system dependencies including GLU
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    cmake \
+    git \
+    xorg-dev \
+    libglu-dev \
+    libeigen3-dev \
+    libceres-dev \
+ && rm -rf /var/lib/apt/lists/*
+
+# Build & install the older G2O version
+RUN git clone https://github.com/RainerKuemmerle/g2o.git /tmp/g2o \
+    && cd /tmp/g2o \
+    && git checkout 20170730_git \
+    && mkdir build && cd build \
+    && cmake -DG2O_BUILD_APPS=OFF -DG2O_BUILD_EXAMPLES=OFF .. \
+    && make -j4 \
+    && make install \
+    && cd ../.. \
+    && rm -rf /tmp/g2o
+
+# Clone and build mv-lm-icp
+# RUN git clone https://github.com/adrelino/mv-lm-icp.git /opt/mv-lm-icp \
+#     && cd /opt/mv-lm-icp \
+#     && git submodule update --init \
+#     && mkdir build && cd build \
+#     && cmake .. \
+#     && make -j4
+
+# WORKDIR /opt/mv-lm-icp/build
+CMD ["/bin/bash"]
